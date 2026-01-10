@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgis/postgis:14-3.3
+    environment:
+      POSTGRES_DB: accinex
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: securepassword123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://admin:securepassword123@postgres:5432/accinex
+      JWT_SECRET: your_very_secure_secret_key_123
+      AI_SERVICE_URL: http://ai-service:5000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+
+  ai-service:
+    build: ./ai_service
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
